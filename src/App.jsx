@@ -1,430 +1,196 @@
-import { useState, useEffect } from "react";
 import "./App.css";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { drinks } from "./data";
+import { FiShoppingCart } from "react-icons/fi";
 
-function App() {
-  const [task, setTask] = useState("");
-  const [tasks, setTasks] = useState(
-    JSON.parse(localStorage.getItem("tasks")) || [],
-  );
+export default function App() {
+  const [index, setIndex] = useState(0);
 
-  const [notes, setNotes] = useState(
-    JSON.parse(localStorage.getItem("notes")) || [],
-  );
+  const drink = drinks[index];
 
-  const [note, setNote] = useState("");
+  const next = () => {
+    setIndex((index + 1) % drinks.length);
+  };
 
-  const [goal, setGoal] = useState("");
-  const [darkMode, setDarkMode] = useState(
-    JSON.parse(localStorage.getItem("darkMode")) || false,
-  );
-  const [goals, setGoals] = useState(
-    JSON.parse(localStorage.getItem("goals")) || [],
-  );
-
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
-
-  useEffect(() => {
-    localStorage.setItem("notes", JSON.stringify(notes));
-  }, [notes]);
-
-  useEffect(() => {
-    localStorage.setItem("goals", JSON.stringify(goals));
-  }, [goals]);
-
-  useEffect(() => {
-    localStorage.setItem("darkMode", JSON.stringify(darkMode));
-
-    if (darkMode) {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
-    }
-  }, [darkMode]);
-
-  function addTask() {
-    if (task.trim() === "") return;
-
-    setTasks([
-      ...tasks,
-      {
-        text: task,
-        completed: false,
-      },
-    ]);
-
-    setTask("");
-  }
-
-  function addNote() {
-    if (note.trim() === "") return;
-    setNotes([...notes, note]);
-    setNote("");
-  }
-
-  function addGoal() {
-    if (goal.trim() === "") return;
-
-    setGoals([
-      ...goals,
-      {
-        text: goal,
-        progress: 0,
-      },
-    ]);
-    setGoal("");
-  }
-
+  const prev = () => {
+    setIndex((index - 1 + drinks.length) % drinks.length);
+  };
   return (
-    <div className="container">
+    <div className="app">
       <header className="navbar">
-        <div className="logo">💙 LifeHub</div>
+        <div className="logo">Splash.</div>
 
-        <nav>
-          <button
-            onClick={() =>
-              document.getElementById("tasks").scrollIntoView({
-                behavior: "smooth",
-              })
-            }
-          >
-            Tasks
-          </button>
+        <div className="menu">
+          <a href="#home" className="active">
+            Home
+          </a>
+          <a href="#products">Products</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </div>
 
-          <button
-            onClick={() =>
-              document.getElementById("calendar").scrollIntoView({
-                behavior: "smooth",
-              })
-            }
-          >
-            Calendar
-          </button>
-
-          <button
-            onClick={() =>
-              document.getElementById("notes").scrollIntoView({
-                behavior: "smooth",
-              })
-            }
-          >
-            Notes
-          </button>
-
-          <button
-            onClick={() =>
-              document.getElementById("goals").scrollIntoView({
-                behavior: "smooth",
-              })
-            }
-          >
-            Goals
-          </button>
-        </nav>
+        <a href="#products" className="icons">
+          <FiShoppingCart />
+        </a>
       </header>
 
-      <div className="content">
-        <div className="topbar">
-          <div>
-            <h1>Good Evening 👋</h1>
-            <p>Stay productive and organize your life.</p>
-          </div>
+      <section
+        id="home"
+        className="hero"
+        style={{
+          background: `linear-gradient(135deg, ${drink.color}, #1e1e1e)`,
+        }}
+      >
+        <div className="circle one"></div>
+        <div className="circle two"></div>
 
-          <button className="theme-btn" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? "☀️" : "🌙"}
-          </button>
+        <AnimatePresence mode="wait">
+          <motion.h1
+            key={drink.name}
+            className="bg-title"
+            initial={{ opacity: 0, y: 80, scale: 0.8 }}
+            animate={{ opacity: 0.12, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -80 }}
+            transition={{ duration: 0.7 }}
+          >
+            {drink.name}
+          </motion.h1>
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={drink.image}
+            src={drink.image}
+            className="drink"
+            initial={{ scale: 0.4, rotate: -25, opacity: 0 }}
+            animate={{
+              scale: 1,
+              rotate: 0,
+              opacity: 1,
+              y: [-10, 10, -10],
+            }}
+            exit={{
+              opacity: 0,
+              rotate: 25,
+              scale: 0.5,
+            }}
+            transition={{
+              duration: 0.8,
+              y: {
+                repeat: Infinity,
+                duration: 5,
+              },
+            }}
+          />
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={drink.id}
+            className="hero-info"
+            initial={{ opacity: 0, x: -80 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 80 }}
+          >
+            <p>Summer Collection</p>
+
+            <h2>{drink.subtitle}</h2>
+
+            <span>{drink.price}</span>
+
+            <button className="btn">Order Now</button>
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="slider-controls">
+          <button onClick={prev}>←</button>
+
+          <span>{String(index + 1).padStart(2, "0")} / 04</span>
+
+          <button onClick={next}>→</button>
         </div>
+      </section>
+
+      <section id="products" className="products">
+        <h2>Popular Cocktails</h2>
 
         <div className="cards">
-          <div className="card">
-            <div className="card-icon">📋</div>
+          {drinks.map((item) => (
+            <div className="card" key={item.id}>
+              <img src={item.image} />
 
-            <h2>{tasks.filter((t) => !t.completed).length}</h2>
+              <h3>{item.name}</h3>
 
-            <p>Pending Tasks</p>
-          </div>
+              <p>{item.price}</p>
 
-          <div className="card">
-            <div className="card-icon">🔥</div>
-
-            <h2>
-              {tasks.length
-                ? Math.round(
-                    (tasks.filter((t) => t.completed).length / tasks.length) *
-                      100,
-                  )
-                : 0}
-              %
-            </h2>
-
-            <p>Productivity</p>
-          </div>
-
-          <div className="card">
-            <div className="card-icon">📝</div>
-
-            <h2>{notes.length}</h2>
-
-            <p>Notes</p>
-          </div>
-
-          <div className="card">
-            <div className="card-icon">🎯</div>
-
-            <h2>
-              {goals.filter((g) => g.progress === 100).length}/{goals.length}
-            </h2>
-
-            <p>Completed Goals</p>
-          </div>
+              <button className="btn">View</button>
+            </div>
+          ))}
         </div>
-        <div className="dashboard-grid">
-          <div className="left-column">
-            {/* TASKS */}
+      </section>
 
-            <div className="section-card tasks-card" id="tasks">
-              <div className="section-header">
-                <div>
-                  <h2>Today's Tasks</h2>
+      <section id="about" className="about">
+        <div className="about-left">
+          <p className="about-tag">ABOUT US</p>
 
-                  <p>Focus on what matters today.</p>
-                </div>
-              </div>
+          <h2>Crafted for Summer.</h2>
 
-              <div className="input-row">
-                <input
-                  type="text"
-                  placeholder="New task..."
-                  value={task}
-                  onChange={(e) => setTask(e.target.value)}
-                />
+          <p className="about-text">
+            Every cocktail is made from fresh fruits and premium ingredients. We
+            focus on taste, beautiful presentation and unforgettable summer
+            vibes.
+          </p>
 
-                <button onClick={addTask}>Add Task</button>
-              </div>
+          <button className="btn">Explore Menu</button>
+        </div>
 
-              <ul className="tasks-list">
-                {tasks.length === 0 && (
-                  <p style={{ color: "#94a3b8" }}>
-                    No tasks yet. Create your first task.
-                  </p>
-                )}
-                {tasks.map((item, index) => (
-                  <li key={index}>
-                    <div className="task-left">
-                      <input
-                        type="checkbox"
-                        checked={item.completed}
-                        onChange={() => {
-                          const newTasks = [...tasks];
-
-                          newTasks[index].completed =
-                            !newTasks[index].completed;
-
-                          setTasks(newTasks);
-                        }}
-                      />
-
-                      <span
-                        style={{
-                          textDecoration: item.completed
-                            ? "line-through"
-                            : "none",
-                        }}
-                      >
-                        {item.text}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() =>
-                        setTasks(tasks.filter((_, i) => i !== index))
-                      }
-                    >
-                      ❌
-                    </button>
-                  </li>
-                ))}
-              </ul>
+        <div className="about-right">
+          <div className="feature">
+            <span>🍓</span>
+            <div>
+              <h3>Fresh Fruits</h3>
+              <p>Natural ingredients every day.</p>
             </div>
           </div>
 
-          <div className="right-column">
-            <div className="section-card">
-              <h2>📊 Productivity</h2>
+          <div className="feature">
+            <span>🥤</span>
+            <div>
+              <h3>Premium Drinks</h3>
+              <p>Unique recipes with perfect balance.</p>
+            </div>
+          </div>
 
-              <div style={{ marginTop: 25 }}>
-                <h1>
-                  {tasks.length
-                    ? Math.round(
-                        (tasks.filter((t) => t.completed).length /
-                          tasks.length) *
-                          100,
-                      )
-                    : 0}
-                  %
-                </h1>
-
-                <div
-                  style={{
-                    width: "100%",
-                    height: 12,
-                    background: "#e5e7eb",
-                    borderRadius: 20,
-                    margin: "20px 0",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${
-                        tasks.length
-                          ? (tasks.filter((t) => t.completed).length /
-                              tasks.length) *
-                            100
-                          : 0
-                      }%`,
-                      height: "100%",
-                      background: "#2563eb",
-                      borderRadius: 20,
-                    }}
-                  />
-                </div>
-
-                <p>✅ Completed: {tasks.filter((t) => t.completed).length}</p>
-
-                <p>📋 Remaining: {tasks.filter((t) => !t.completed).length}</p>
-              </div>
+          <div className="feature">
+            <span>⚡</span>
+            <div>
+              <h3>Fast Service</h3>
+              <p>Ready in just a few minutes.</p>
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="dashboard-grid second-row">
-          <div className="section-card" id="notes">
-            <div className="section-header">
-              <div>
-                <h2>Quick Notes</h2>
-                <p>Capture your ideas.</p>
-              </div>
-            </div>
+      <section id="contact" className="contact">
+        <h2>Visit Splash.</h2>
 
-            <div className="input-row">
-              <input
-                type="text"
-                placeholder="Write note..."
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
+        <p>Open every day 10:00 - 22:00</p>
 
-              <button onClick={addNote}>Add</button>
-            </div>
+        <button className="btn">Order Now</button>
+      </section>
 
-            <ul>
-              {notes.map((item, index) => (
-                <li key={index}>
-                  {item}
+      <footer>
+        <p>© 2026 Splash. All rights reserved.</p>
 
-                  <button
-                    onClick={() =>
-                      setNotes(notes.filter((_, i) => i !== index))
-                    }
-                  >
-                    ❌
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {notes.length === 0 && (
-              <p style={{ color: "#94a3b8", marginTop: 15 }}>No notes yet.</p>
-            )}
-          </div>
+        <div>
+          <a href="#">Instagram</a>
 
-          <div className="section-card" id="goals">
-            <div className="section-header">
-              <div>
-                <h2>Goals</h2>
-                <p>Keep moving forward.</p>
-              </div>
-            </div>
+          <a href="#">TikTok</a>
 
-            <div className="input-row">
-              <input
-                type="text"
-                placeholder="New goal..."
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-              />
-
-              <button onClick={addGoal}>Add</button>
-            </div>
-
-            <ul>
-              {goals.map((item, index) => (
-                <li key={index}>
-                  <div style={{ width: "100%" }}>
-                    <strong>{item.text}</strong>
-
-                    <div
-                      style={{
-                        width: "100%",
-                        height: 10,
-                        background: "#e5e7eb",
-                        borderRadius: 10,
-                        marginTop: 10,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: `${item.progress}%`,
-                          height: "100%",
-                          background: "#2563eb",
-                          borderRadius: 10,
-                        }}
-                      />
-                    </div>
-
-                    <p style={{ marginTop: 8 }}>{item.progress}%</p>
-
-                    <button
-                      style={{ marginTop: 10 }}
-                      onClick={() => {
-                        const newGoals = [...goals];
-
-                        newGoals[index].progress = Math.min(
-                          newGoals[index].progress + 10,
-                          100,
-                        );
-
-                        setGoals(newGoals);
-                      }}
-                    >
-                      +10%
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      setGoals(goals.filter((_, i) => i !== index))
-                    }
-                  >
-                    ❌
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {goals.length === 0 && (
-              <p style={{ color: "#94a3b8", marginTop: 15 }}>No goals yet.</p>
-            )}
-          </div>
+          <a href="#">Facebook</a>
         </div>
-
-        <hr />
-
-        <p style={{ marginTop: 20, textAlign: "center", color: "#666" }}>
-          LifeHub © 2026
-        </p>
-      </div>
+      </footer>
     </div>
   );
 }
-
-export default App;
